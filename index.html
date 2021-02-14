@@ -1,0 +1,115 @@
+ <!DOCTYPE html>
+<html>
+<head>
+	<title>UNIVERSE</title>
+	<style>
+		body {
+			background-color: #000;
+			background-repeat: no-repeat;
+			background-size: cover;
+			position: relative;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.1/easing/EasePack.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.1/TweenMax.min.js"></script>
+	<script>
+		var universe = {
+			init : function(){
+				this.init_canvas();
+				this.particle_texture = this.particle_texture_canvas(20,25, 181, 254,1);
+				this.generate_particle();
+				this.set_tween();
+				this.animate();
+			},
+			init_canvas : function(){
+				this.h = window.innerHeight;
+				this.w = window.innerWidth;
+				
+				this.canvas = document.createElement('canvas');
+				document.body.appendChild(this.canvas);
+				this.canvas.width = this.w;
+				this.canvas.height = this.h;
+				
+				this.ctx = this.canvas.getContext('2d');
+			},
+			animate : function(){
+				universe.draw_canvas();
+				requestAnimationFrame(universe.animate);
+			},
+			generate_particle : function(){
+				this.particles = [];
+				this.particle_count = 500;
+				for(var i = 0; i < this.particle_count; i++){
+					var particle = {
+						x : this.w/2,
+						y : this.h/2,
+						xend : Math.random()*this.w,
+						yend : Math.random()*this.h,
+						size : 0,
+						sizeend : Math.random()*20,
+						speed : Math.random()*25 + 25,
+						opacity : Math.random()
+					}
+					this.particles.push(particle);
+				}
+			},
+			set_tween : function(){
+				for(var i = 0; i < this.particles.length; i++){
+					var c_particle = this.particles[i];
+					TweenMax.to(
+						c_particle,
+						c_particle.speed,//time in seconds
+						{
+							x : c_particle.xend,
+							y : c_particle.yend,
+							size : c_particle.sizeend,
+							opacity : 0,
+							repeat : -1,
+							ease :   Power0.easeNone
+						}
+					);
+				}
+			},
+			draw_canvas : function(){
+				this.ctx.clearRect(0, 0, this.w, this.h);
+				this.ctx.globalCompositeOperation = 'lighter';
+				for(var i = 0; i < this.particles.length; i++){
+					var c_particle = this.particles[i];
+					this.ctx.globalAlpha = c_particle.opacity;
+					this.ctx.drawImage(this.particle_texture, c_particle.x, c_particle.y, c_particle.size, c_particle.size);
+				}
+			},
+			particle_texture_canvas : function(size,r,g,b,a){
+				// create canvas
+				var canvas = document.createElement( 'canvas' );
+				canvas.width = size;
+				canvas.height = size;
+
+				// get context
+				var context = canvas.getContext( '2d' );
+
+				// draw gradient
+				context.rect( 0, 0, size, size );
+				var gradient = context.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+				gradient.addColorStop(0, "rgba(255,255,255," + a + ")");
+				gradient.addColorStop(.2, "rgba(" + [ r, g, b, a ] + ")");
+				gradient.addColorStop(1, "rgba(" + [ 255, 255, 255, 0 ] + ")");
+				context.fillStyle = gradient;
+				context.fillRect(0, 0, size, size);
+
+				// var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+				// window.location.href=image; // it will save locally
+
+				return canvas;
+			}
+	    }
+
+	    universe.init();
+	</script>
+</body>
+</html> 
